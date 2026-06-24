@@ -1,0 +1,623 @@
+/* Custom CSS for Emotion Detection App */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.attractive-brand {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    background: linear-gradient(45deg, #ffd700, #ffba00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    letter-spacing: 0.5px;
+}
+
+.attractive-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    letter-spacing: -1px;
+    padding-bottom: 5px;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+}
+
+/* Student Interface Styles */
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.emotion-display {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    color: white;
+}
+
+.emotion-badge {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 10px 0;
+}
+
+.emotion-happy { background-color: #28a745; }
+.emotion-sad { background-color: #6c757d; }
+.emotion-angry { background-color: #dc3545; }
+.emotion-surprise { background-color: #ffc107; color: #000; }
+.emotion-fear { background-color: #6f42c1; }
+.emotion-disgust { background-color: #fd7e14; }
+.emotion-neutral { background-color: #17a2b8; }
+
+.progress {
+    height: 25px;
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.progress-bar {
+    border-radius: 15px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    transition: width 0.3s ease;
+}
+
+.emotion-history {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.emotion-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.emotion-history-item:last-child {
+    border-bottom: none;
+}
+
+.emotion-history-item .emotion {
+    font-weight: bold;
+    min-width: 80px;
+}
+
+.emotion-history-item .score {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.emotion-history-item .time {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Feedback Area */
+.feedback-area {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* Stats */
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.stats-item:last-child {
+    border-bottom: none;
+}
+
+.stats-item span:first-child {
+    font-weight: 500;
+}
+
+.stats-item span:last-child {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Teacher Dashboard Styles */
+.students-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.student-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.student-card:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+}
+
+.student-info h6 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.status {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background-color: #6c757d;
+    color: white;
+}
+
+.status.online {
+    background-color: #28a745;
+}
+
+.emotion-updates {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.emotion-update-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.student-name {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.emotion-info {
+    display: flex;
+    gap: 10px;
+}
+
+.emotion-info .emotion {
+    padding: 4px 8px;
+    border-radius: 12px;
+    background-color: #007bff;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.emotion-info .engagement {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Analytics Cards */
+.stat-card {
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.stat-card h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.stat-card p {
+    margin: 5px 0 0 0;
+    opacity: 0.9;
+}
+
+/* Session Items */
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-info strong {
+    color: #007bff;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .video-container {
+        max-width: 100%;
+    }
+    
+    .emotion-display {
+        margin-top: 20px;
+    }
+    
+    .student-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .emotion-update-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Attention Monitoring Styles */
+.attention-indicator {
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.attention-score {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.attention-status {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 2px;
+    display: inline-block;
+}
+
+.status-attentive {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-partially-attentive {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-distracted {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-inattentive {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+
+.status-absent-/-disengaged {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.status-low-engagement {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-no-face-detected {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Attention Info in Updates */
+.attention-info {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.attention-info .attention-score {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 0.8rem;
+}
+
+.attention-info .attention-status {
+    font-size: 0.7rem;
+}
+
+.face-status {
+    margin-top: 5px;
+}
+
+.face-detected {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.face-detected.detected {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.face-detected.not-detected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Alert Styles */
+.alert-item {
+    background-color: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #dc3545;
+}
+
+.alert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.alert-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.alert-low-attention {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-face-absent {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.alert-distracted {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-inattentive {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-default {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert-content {
+    font-size: 0.9rem;
+}
+
+.alert-student {
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 4px;
+}
+
+.alert-message {
+    color: #6c757d;
+    margin-bottom: 6px;
+}
+
+.alert-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.alert-meta .attention-score {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.acknowledge-btn {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+}
+
+/* Enhanced Emotion Update Items */
+.emotion-update-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.emotion-update-item .student-name {
+    font-weight: bold;
+    color: #007bff;
+    font-size: 0.9rem;
+}
+
+.emotion-update-item .emotion-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.emotion-update-item .emotion-info .emotion {
+    padding: 4px 8px;
+    border-radius: 12px;
+    background-color: #007bff;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.emotion-update-item .emotion-info .engagement {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 0.8rem;
+}
+
+.emotion-update-item .attention-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.emotion-update-item .attention-info .attention-score {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 0.8rem;
+}
+
+.emotion-update-item .attention-info .attention-status {
+    font-size: 0.7rem;
+}
+
+.emotion-update-item .face-status {
+    margin-top: 2px;
+}
+
+.emotion-update-item .timestamp {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-align: right;
+}
+
+/* Responsive adjustments for attention monitoring */
+@media (max-width: 768px) {
+    .attention-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .alert-meta {
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .emotion-update-item .emotion-info,
+    .emotion-update-item .attention-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}

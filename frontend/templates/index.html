@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-5">
+            <h1 class="display-4 attractive-title fw-bold text-primary">
+                <i class="fas fa-brain me-2"></i>Cognitrack
+            </h1>
+            <p class="lead fw-semibold text-muted" style="letter-spacing: 1px; font-size: 1.1rem;">
+                Smarter Insights. Better Engagement. Stronger Learning
+            </p>
+            <p class="text-muted">Enhance virtual learning with real-time student behavior monitoring and personalized teacher feedbacks.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chalkboard-teacher fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title">For Teachers</h3>
+                        <p class="card-text">
+                            Monitor cognitive engagement, detect anomalies like intruders or high noise, and send targeted messages.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="fas fa-check text-success"></i> Emotion & cognitive engagement tracking</li>
+                            <li><i class="fas fa-check text-success"></i> Automated identity & intruder alerts</li>
+                            <li><i class="fas fa-check text-success"></i> Audio, gaze, & head pose monitoring</li>
+                            <li><i class="fas fa-check text-success"></i> Direct student messaging system</li>
+                        </ul>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                            Teacher Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
+                        <h3 class="card-title">For Students</h3>
+                        <p class="card-text">
+                            Join classes with automated attendance, receive real-time focus feedback, and stay engaged through teacher guidance.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="fas fa-check text-success"></i> Emotion & live focus feedback</li>
+                            <li><i class="fas fa-check text-success"></i> Automated attendance verification</li>
+                            <li><i class="fas fa-check text-success"></i> Real-time messages from teachers</li>
+                            <li><i class="fas fa-check text-success"></i> Detailed session analytics</li>
+                        </ul>
+                        <a href="{{ url_for('login') }}" class="btn btn-success btn-lg">
+                            Student Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle"></i> How It Works
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="step-number">1</div>
+                                <h5>Camera Access</h5>
+                                <p>Students allow camera access for emotion detection during class</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="step-number">2</div>
+                                <h5>Real-time Analysis</h5>
+                                <p>AI analyzes facial expressions to detect emotions and engagement</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="step-number">3</div>
+                                <h5>Teacher Messages</h5>
+                                <p>Teachers receive insights and can send instant messages</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted">
+                <i class="fas fa-shield-alt"></i>
+                Your privacy is protected. All data is processed locally and securely.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.step-number {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 auto 15px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitrack - AI-Powered Student Engagement Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        .navbar-premium {
+            background: linear-gradient(135deg, #1A2980 0%, #26D0CE 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #ffd700 !important;
+        }
+
+        footer {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #1A2980 0%, #111827 100%);
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-premium py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <i class="fas fa-brain text-warning me-2 fs-3"></i>
+                <span class="attractive-brand fs-4 fw-bold">Cognitrack</span>
+                <span
+                    class="d-none d-lg-inline text-white-50 border-start border-light border-opacity-25 ms-3 ps-3 fs-6 font-monospace"
+                    style="letter-spacing: 0.5px;">AI DRIVEN STUDENT COGNITIVE ENGAGEMENT MONITORING PLATFORM</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto align-items-center">
+                    {% if current_user.is_authenticated %}
+                    <span class="navbar-text me-4 fw-semibold text-white">Welcome, {{ current_user.username }}</span>
+                    <a class="btn btn-outline-light rounded-pill px-4" href="{{ url_for('logout') }}"><i
+                            class="fas fa-sign-out-alt me-1"></i> Logout</a>
+                    {% else %}
+                    <a class="nav-link px-3" href="{{ url_for('login') }}">Login</a>
+                    <a class="btn btn-warning rounded-pill px-4 ms-2 fw-bold text-dark"
+                        href="{{ url_for('register') }}">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer py-3 text-white text-center">
+        <div class="container">
+            <span class="text-white-50">© 2025 Developed by Manoj Kumar. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

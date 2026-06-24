@@ -1,0 +1,685 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-video"></i> Student Interface</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-4">
+                        <div class="video-container">
+                            <video id="video" autoplay playsinline muted style="width: 100%; height: auto;"></video>
+                            <canvas id="canvas" style="display: none;"></canvas>
+                        </div>
+                        <div id="camera-status" class="alert alert-info mt-2" style="display: none;">
+                            Initializing camera...
+                        </div>
+                        <div id="notifyBanner" class="alert alert-secondary mt-2" style="display:none;">
+                            Notifications are off. <button id="enableNotifyBtn" class="btn btn-sm btn-outline-primary">Enable Notifications</button>
+                        </div>
+                        <div class="mt-3">
+                            <button id="startBtn" class="btn btn-success" disabled>
+                                <i class="fas fa-play"></i> Start Detection
+                            </button>
+                            <button id="stopBtn" class="btn btn-danger" disabled>
+                                <i class="fas fa-stop"></i> Stop Detection
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mb-4">
+                        <div class="emotion-display shadow-sm rounded-4" style="background: linear-gradient(135deg, #1A2980 0%, #26D0CE 100%);">
+                            <h5 class="fw-bold">Current Emotion:</h5>
+                            <div id="currentEmotion" class="emotion-badge bg-white text-dark shadow-sm">Not Detected</div>
+                            
+                            <h5 class="mt-4 fw-bold">Live Status:</h5>
+                            <div class="d-flex justify-content-between mb-3 bg-white bg-opacity-25 p-3 rounded-3">
+                                <div>
+                                    <small class="d-block text-white-50">Persons Detected</small>
+                                    <span id="personCount" class="fw-bold fs-4">0</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block text-white-50">Identity</small>
+                                    <span id="identityStatus" class="fw-bold fs-6 badge bg-secondary">Unknown</span>
+                                </div>
+                            </div>
+                            
+                            <h5 class="mt-3 fw-bold">Engagement Score:</h5>
+                            <div class="progress mb-4 bg-dark bg-opacity-25" style="height: 20px; border-radius: 10px;">
+                                <div id="engagementBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            
+                            <h5 class="fw-bold">Recent Emotions:</h5>
+                            <div id="emotionHistory" class="emotion-history"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-comments"></i> Teacher Messages</h5>
+            </div>
+            <div class="card-body">
+                <div id="feedbackArea" class="feedback-area">
+                    <p class="text-muted">No messages yet. Your teacher will send messages here.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h5><i class="fas fa-chart-line"></i> Session Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="stats-item">
+                    <span>Session Duration:</span>
+                    <span id="sessionDuration">00:00</span>
+                </div>
+                <div class="stats-item">
+                    <span>Emotions Detected:</span>
+                    <span id="emotionCount">0</span>
+                </div>
+                <div class="stats-item">
+                    <span>Avg Engagement:</span>
+                    <span id="avgEngagement">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Global variables
+let video, canvas, ctx;
+let audioContext, microphone, audioProcessor;
+let isDetecting = false;
+let detectionInterval;
+let audioInterval;
+let sessionStartTime;
+let emotionCount = 0;
+let totalEngagement = 0;
+let engagementCount = 0;
+const sessionId = "{{ session_id }}";  // Get session_id from template as string
+let originalTitle = document.title;
+let unseenFeedbackCount = 0;
+
+// Initialize video
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize UI elements
+    video = document.getElementById('video');
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+    const cameraStatus = document.getElementById('camera-status');
+    
+    // Show camera status
+    cameraStatus.style.display = 'block';
+    
+    // Function to initialize camera and microphone
+    async function initCamera() {
+        try {
+            // First try with ideal settings (both video and audio)
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    frameRate: { ideal: 30 },
+                    facingMode: 'user'
+                },
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    sampleRate: 44100
+                }
+            });
+            
+            video.srcObject = stream;
+            
+            // Initialize audio processing
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                microphone = audioContext.createMediaStreamSource(stream);
+                
+                // Create audio processor node
+                const bufferSize = 4096;
+                audioProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+                
+                audioProcessor.onaudioprocess = function(e) {
+                    // Always process audio, not just when detecting (for continuous monitoring)
+                    const inputData = e.inputBuffer.getChannelData(0);
+                    // Send audio data continuously (will be throttled inside sendAudioData)
+                    sendAudioData(inputData);
+                };
+                
+                microphone.connect(audioProcessor);
+                audioProcessor.connect(audioContext.destination);
+                
+                console.log('Audio initialized successfully');
+            } catch (audioErr) {
+                console.warn('Audio initialization failed:', audioErr);
+                // Continue without audio
+            }
+            
+            cameraStatus.textContent = 'Camera and microphone initialized successfully';
+            cameraStatus.className = 'alert alert-success mt-2';
+            
+            // Wait for video to be ready
+            video.onloadedmetadata = function(e) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                console.log(`Video initialized: ${video.videoWidth}x${video.videoHeight}`);
+                document.getElementById('startBtn').disabled = false;
+            };
+            
+            video.onerror = function(e) {
+                console.error('Video error:', e);
+                cameraStatus.textContent = 'Error with video playback';
+                cameraStatus.className = 'alert alert-danger mt-2';
+            };
+            
+        } catch (err) {
+            console.error('Camera initialization error:', err);
+            cameraStatus.textContent = 'Error: ' + (err.message || 'Could not access camera');
+            cameraStatus.className = 'alert alert-danger mt-2';
+            
+            // Try fallback settings
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                video.srcObject = stream;
+                
+                // Try audio initialization
+                try {
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        const bufferSize = 4096;
+                        audioProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+                        audioProcessor.onaudioprocess = function(e) {
+                            if (isDetecting) {
+                                const inputData = e.inputBuffer.getChannelData(0);
+                                sendAudioData(inputData);
+                            }
+                        };
+                        microphone.connect(audioProcessor);
+                        audioProcessor.connect(audioContext.destination);
+                    }
+                } catch (audioErr) {
+                    console.warn('Audio fallback failed:', audioErr);
+                }
+                
+                cameraStatus.textContent = 'Camera initialized with fallback settings';
+                cameraStatus.className = 'alert alert-warning mt-2';
+            } catch (fallbackErr) {
+                console.error('Fallback camera initialization failed:', fallbackErr);
+                cameraStatus.textContent = 'Error: Could not access camera. Please check camera permissions.';
+                cameraStatus.className = 'alert alert-danger mt-2';
+            }
+        }
+    }
+    
+    // Initialize camera
+    initCamera().catch(err => {
+        console.error('Error accessing camera:', err);
+        alert('Camera access denied. Please allow camera access to use emotion detection.');
+    });
+    
+    // Initialize socket connection
+    const socket = io();
+    
+    // Listen for feedback from teacher
+    socket.on('feedback_received', function(data) {
+        displayFeedback(data);
+        // Browser notification + sound + title badge
+        sendBrowserNotification(data);
+        playBeep();
+        incrementTitleBadge();
+    });
+    
+    // Start/Stop detection buttons
+    document.getElementById('startBtn').addEventListener('click', startDetection);
+    document.getElementById('stopBtn').addEventListener('click', stopDetection);
+
+    // Notification UI banner
+    setupNotificationBanner();
+
+    // Clear title badge when window focused
+    window.addEventListener('focus', resetTitleBadge);
+});
+
+function startDetection() {
+    const cameraStatus = document.getElementById('camera-status');
+    
+    if (!video.srcObject) {
+        cameraStatus.textContent = 'Error: Camera not available. Please check your camera connection.';
+        cameraStatus.className = 'alert alert-danger mt-2';
+        cameraStatus.style.display = 'block';
+        return;
+    }
+    
+    if (video.readyState !== 4) {
+        cameraStatus.textContent = 'Please wait for camera to fully initialize...';
+        cameraStatus.className = 'alert alert-warning mt-2';
+        cameraStatus.style.display = 'block';
+        setTimeout(startDetection, 1000);
+        return;
+    }
+    
+    try {
+        isDetecting = true;
+        sessionStartTime = new Date();
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+        
+        // Hide camera status when starting detection
+        cameraStatus.style.display = 'none';
+        
+        // Start detection loop
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+            detectionInterval = null;
+        }
+        detectionInterval = setInterval(captureAndDetect, 1000); // Every second
+        
+        // Start session timer
+        updateSessionTimer();
+        
+        console.log('Detection started successfully');
+    } catch (err) {
+        console.error('Error starting detection:', err);
+        cameraStatus.textContent = 'Error starting detection: ' + err.message;
+        cameraStatus.className = 'alert alert-danger mt-2';
+        cameraStatus.style.display = 'block';
+    }
+}
+
+function stopDetection() {
+    try {
+        isDetecting = false;
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+            detectionInterval = null;
+        }
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+        console.log('Detection stopped successfully');
+    } catch (err) {
+        console.error('Error stopping detection:', err);
+        const cameraStatus = document.getElementById('camera-status');
+        cameraStatus.textContent = 'Error stopping detection: ' + err.message;
+        cameraStatus.className = 'alert alert-danger mt-2';
+        cameraStatus.style.display = 'block';
+    }
+}
+
+function captureAndDetect() {
+    if (!isDetecting) return;
+    
+    if (!video.videoWidth || !video.videoHeight) {
+        console.log('Waiting for video dimensions...');
+        return;
+    }
+    
+    try {
+        // Ensure canvas dimensions match video
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            console.log(`Canvas resized to ${canvas.width}x${canvas.height}`);
+        }
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw current frame
+        ctx.drawImage(video, 0, 0);
+        console.log('Frame drawn to canvas');
+        
+        // Convert to base64 with better quality
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+        console.log('Frame converted to base64, length:', imageData.length);
+    
+        // Send to server for emotion detection
+        console.log('Sending detection request for session:', sessionId);
+        
+        fetch('/api/emotion_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image: imageData,
+                session_id: parseInt(sessionId)  // Convert to number since it comes as string from template
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);  // Debug log
+            if (data.success) {
+                updateEmotionDisplay(data);
+                
+                // Update attention status if available
+                const statusEl = document.createElement('div');
+                let alertClass = 'success';
+                if (data.attention_score <= 40 || data.intruder_detected || data.person_count > 1) {
+                    alertClass = 'danger';
+                } else if (data.attention_score <= 70) {
+                    alertClass = 'warning';
+                }
+                statusEl.className = `alert alert-${alertClass} mt-3 fw-bold shadow-sm`;
+                statusEl.innerHTML = `<i class="fas fa-info-circle me-1"></i> Attention Status: ${data.attention_status} (${Math.round(data.attention_score)}%)`;
+                
+                const currentStatus = document.querySelector('.attention-status');
+                if (currentStatus) {
+                    currentStatus.remove();
+                }
+                statusEl.className += ' attention-status';
+                document.querySelector('.emotion-display').appendChild(statusEl);
+            } else {
+                console.error('Server returned error:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('currentEmotion').textContent = 'Error: ' + error.message;
+            document.getElementById('currentEmotion').className = 'emotion-badge emotion-error';
+        });
+    } catch (err) {
+        console.error('Capture error:', err);
+    }
+}
+
+function sendAudioData(audioData) {
+    try {
+        // Only send if detection is active
+        if (!isDetecting) {
+            return;
+        }
+        
+        // Send to server (throttle to avoid too many requests - every 1.5 seconds)
+        if (!sendAudioData.lastSend || Date.now() - sendAudioData.lastSend > 1500) {
+            // Sample audio data (take every 10th sample to reduce size)
+            const sampled = [];
+            for (let i = 0; i < audioData.length; i += 10) {
+                sampled.push(audioData[i]);
+            }
+            
+            // Convert Float32Array to Int16Array for transmission
+            const int16Array = new Int16Array(sampled.length);
+            for (let i = 0; i < sampled.length; i++) {
+                // Clamp and convert to 16-bit PCM
+                const s = Math.max(-1, Math.min(1, sampled[i]));
+                int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            
+            // Convert to base64
+            const uint8Array = new Uint8Array(int16Array.buffer);
+            let binary = '';
+            for (let i = 0; i < uint8Array.length; i++) {
+                binary += String.fromCharCode(uint8Array[i]);
+            }
+            const base64Audio = btoa(binary);
+            
+            fetch('/api/audio_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',  // Include cookies for auth
+                body: JSON.stringify({
+                    audio_data: base64Audio,
+                    session_id: parseInt(sessionId)
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log('Audio processed:', data.voice_status, 'Noise:', data.noise_level);
+                } else {
+                    console.warn('Audio processing failed:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Audio send error:', error);
+            });
+            
+            sendAudioData.lastSend = Date.now();
+        }
+    } catch (err) {
+        console.error('Error processing audio:', err);
+    }
+}
+
+function updateEmotionDisplay(data) {
+    const emotions = data.emotions;
+    const engagementScore = data.engagement_score;
+    const personCount = data.person_count || 0;
+    const intruderDetected = data.intruder_detected || false;
+    
+    console.log('Updating display with:', { emotions, engagementScore, personCount, intruderDetected });
+    
+    const currentEmotionEl = document.getElementById('currentEmotion');
+    const engagementBarEl = document.getElementById('engagementBar');
+    const personCountEl = document.getElementById('personCount');
+    const identityStatusEl = document.getElementById('identityStatus');
+    
+    // Update Person Count and Intruder state
+    personCountEl.textContent = personCount;
+    if (personCount > 1) {
+        personCountEl.className = "fw-bold fs-4 text-warning";
+    } else {
+        personCountEl.className = "fw-bold fs-4 text-white";
+    }
+    
+    if (intruderDetected) {
+        identityStatusEl.textContent = "Intruder Detected!";
+        identityStatusEl.className = "fw-bold fs-6 badge bg-danger text-white";
+    } else if (personCount === 1) {
+        identityStatusEl.textContent = "Verified";
+        identityStatusEl.className = "fw-bold fs-6 badge bg-success text-white";
+    } else if (personCount === 0) {
+        identityStatusEl.textContent = "No Person";
+        identityStatusEl.className = "fw-bold fs-6 badge bg-secondary text-white";
+    } else {
+        identityStatusEl.textContent = "Multiple People";
+        identityStatusEl.className = "fw-bold fs-6 badge bg-warning text-dark";
+    }
+    
+    if (emotions && emotions.length > 0) {
+        const emotion = emotions[0];
+        console.log('Processing emotion:', emotion);  // Debug log
+        
+        // Update current emotion
+        currentEmotionEl.textContent = emotion.emotion;
+        currentEmotionEl.className = `emotion-badge emotion-${emotion.emotion.toLowerCase()} fw-bold shadow-sm`;
+        
+        // Update engagement bar
+        const engagementPercent = Math.round(engagementScore * 100);
+        engagementBarEl.style.width = `${engagementPercent}%`;
+        engagementBarEl.textContent = `${engagementPercent}%`;
+        
+        // Update color based on engagement level
+        if (engagementPercent > 70) {
+            engagementBarEl.className = 'progress-bar bg-success';
+        } else if (engagementPercent > 40) {
+            engagementBarEl.className = 'progress-bar bg-warning';
+        } else {
+            engagementBarEl.className = 'progress-bar bg-danger';
+        }
+        
+        // Update stats
+        emotionCount++;
+        totalEngagement += engagementScore;
+        engagementCount++;
+        
+        document.getElementById('emotionCount').textContent = emotionCount;
+        document.getElementById('avgEngagement').textContent = 
+            `${Math.round((totalEngagement / engagementCount) * 100)}%`;
+        
+        // Add to history
+        addToEmotionHistory(emotion.emotion, engagementScore);
+    } else {
+        currentEmotionEl.textContent = 'No Face Detected';
+        currentEmotionEl.className = 'emotion-badge emotion-neutral';
+        engagementBarEl.style.width = '0%';
+        engagementBarEl.textContent = '0%';
+        engagementBarEl.className = 'progress-bar bg-secondary';
+    }
+}
+
+function addToEmotionHistory(emotion, score) {
+    const history = document.getElementById('emotionHistory');
+    const item = document.createElement('div');
+    item.className = 'emotion-history-item';
+    item.innerHTML = `
+        <span class="emotion">${emotion}</span>
+        <span class="score">${Math.round(score * 100)}%</span>
+        <span class="time">${new Date().toLocaleTimeString()}</span>
+    `;
+    
+    history.insertBefore(item, history.firstChild);
+    
+    // Keep only last 10 items
+    while (history.children.length > 10) {
+        history.removeChild(history.lastChild);
+    }
+}
+
+function displayFeedback(data) {
+    const feedbackArea = document.getElementById('feedbackArea');
+    const feedbackItem = document.createElement('div');
+    feedbackItem.className = `alert alert-${data.feedback_type === 'encouragement' ? 'success' : data.feedback_type === 'warning' ? 'warning' : 'info'}`;
+    feedbackItem.innerHTML = `
+        <strong>From ${data.teacher}:</strong><br>
+        ${data.message}<br>
+        <small class="text-muted">${new Date(data.timestamp).toLocaleString()}</small>
+    `;
+    
+    feedbackArea.insertBefore(feedbackItem, feedbackArea.firstChild);
+    
+    // Keep only last 5 feedback items
+    while (feedbackArea.children.length > 5) {
+        feedbackArea.removeChild(feedbackArea.lastChild);
+    }
+}
+
+// Browser notification helper
+function sendBrowserNotification(data) {
+    try {
+        if (!('Notification' in window)) { showToast(`${data.teacher || 'Teacher'}: ${data.message}`); return; }
+        if (Notification.permission !== 'granted') { showToast(`${data.teacher || 'Teacher'}: ${data.message}`); return; }
+        const title = `Message from ${data.teacher || 'Teacher'}`;
+        const options = {
+            body: data.message || 'New message received',
+            // icon can be added if available: '/static/icon.png'
+        };
+        new Notification(title, options);
+    } catch (_) {}
+}
+
+// Simple beep using Web Audio API (no external file)
+function playBeep() {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(880, ctx.currentTime); // A5
+        g.gain.setValueAtTime(0.0001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        o.stop(ctx.currentTime + 0.22);
+        // close context after short delay to free resources
+        setTimeout(() => { try { ctx.close(); } catch(_){} }, 400);
+    } catch (_) {}
+}
+
+function incrementTitleBadge() {
+    unseenFeedbackCount += 1;
+    document.title = `(${unseenFeedbackCount}) New Message — ${originalTitle}`;
+}
+
+function resetTitleBadge() {
+    unseenFeedbackCount = 0;
+    document.title = originalTitle;
+}
+
+function setupNotificationBanner() {
+    try {
+        if (!('Notification' in window)) return;
+        const banner = document.getElementById('notifyBanner');
+        const btn = document.getElementById('enableNotifyBtn');
+        const updateBanner = () => {
+            banner.style.display = (Notification.permission === 'granted') ? 'none' : 'block';
+        };
+        updateBanner();
+        if (btn) {
+            btn.addEventListener('click', () => {
+                Notification.requestPermission().then(updateBanner).catch(updateBanner);
+            });
+        }
+    } catch(_) {}
+}
+
+// Lightweight toast
+function showToast(message) {
+    try {
+        let t = document.getElementById('toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'toast';
+            t.style.position = 'fixed';
+            t.style.right = '16px';
+            t.style.bottom = '16px';
+            t.style.background = '#343a40';
+            t.style.color = '#fff';
+            t.style.padding = '10px 14px';
+            t.style.borderRadius = '6px';
+            t.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            t.style.zIndex = '9999';
+            document.body.appendChild(t);
+        }
+        t.textContent = message;
+        t.style.opacity = '1';
+        setTimeout(() => { t.style.opacity = '0'; }, 2500);
+    } catch(_) {}
+}
+
+function updateSessionTimer() {
+    if (!isDetecting) return;
+    
+    const now = new Date();
+    const duration = Math.floor((now - sessionStartTime) / 1000);
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    
+    document.getElementById('sessionDuration').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    setTimeout(updateSessionTimer, 1000);
+}
+</script>
+{% endblock %}

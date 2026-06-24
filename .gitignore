@@ -1,0 +1,36 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Uploads and Database
+uploads/
+instance/
+*.sqlite3
+*.db
+
+# ML Models (unless you want them in the repo)
+models/
+*.h5
+*.pt
+*.pth
+*.onnx
+
+# IDEs and Editors
+.vscode/
+*.code-workspace
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
