@@ -1,9 +1,4 @@
-opencv-python==4.8.1.78
-tensorflow==2.13.0
-numpy==1.24.3
-flask==3.0.0
-flask-socketio==5.3.6
-opencv-python==4.8.1.78
+opencv-python-headless==4.8.1.78
 tensorflow==2.13.0
 numpy==1.24.3
 flask==3.0.0
@@ -14,6 +9,5 @@ eventlet==0.33.3
 sqlalchemy==2.0.21
 flask-sqlalchemy==3.0.5
 flask-login==0.6.3
-werkzeug==2.3.7
 deepface
 gunicorn==21.2.0
