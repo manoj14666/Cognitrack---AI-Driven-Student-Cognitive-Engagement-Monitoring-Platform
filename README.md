@@ -1,3 +1,19 @@
+---
+title: Cognitrack
+emoji: 🧠
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
+# Cognitrack - Smarter Insights. Better Engagement. Stronger Learning
+
+## Project Overview
+This project provides real-time facial emotion detection and cognitive engagement monitoring for online classes, allowing teachers to monitor student engagement, receive automatic low attention alerts, verify student identity via face recognition, detect intruders, monitor class volume/noise levels, and send instant feedback to students.
+
+## Features
+- Real-time facial emotion detection using webcam
 - Teacher dashboard for monitoring multiple students
 - Feedback system for teachers to provide guidance
 - Analytics and reporting for class engagement
@@ -34,7 +50,7 @@
 - Database: SQLite
 
 ## Project Structure
-```
+```text
 ├── app.py                 # Main Flask application
 ├── emotion_detector.py    # Emotion detection logic
 ├── models/               # AI models directory
