@@ -449,20 +449,20 @@ def handle_disconnect():
             }, room='teacher_room')
         print(f"User {current_user.username} disconnected")
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        
-        # Create default teacher account if none exists
-        if not User.query.filter_by(role='teacher').first():
-            teacher = User(
-                username='teacher',
-                email='teacher@example.com',
-                password_hash=generate_password_hash('password'),
-                role='teacher'
-            )
-            db.session.add(teacher)
-            db.session.commit()
-            print("Default teacher account created: username='teacher', password='password'")
+with app.app_context():
+    db.create_all()
     
+    # Create default teacher account if none exists
+    if not User.query.filter_by(role='teacher').first():
+        teacher = User(
+            username='teacher',
+            email='teacher@example.com',
+            password_hash=generate_password_hash('password'),
+            role='teacher'
+        )
+        db.session.add(teacher)
+        db.session.commit()
+        print("Default teacher account created: username='teacher', password='password'")
+
+if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)
